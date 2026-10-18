@@ -2,7 +2,7 @@
  * The icon set the extension's pages draw with.
  *
  * The app's Protection tab carries a line icon on every row — a shield for the
- * switch, a brain for Brain Bot, a triangle for Strict Mode — and the pages used
+ * switch, a brain for Brain Rot, a triangle for Strict Mode — and the pages used
  * to stand in coloured emoji instead. Emoji cannot take the accent colour, they
  * render differently on every platform, and they sit oddly beside the sentence
  * they label, so the rows now share one drawn set: 24×24, no fill, `currentColor`

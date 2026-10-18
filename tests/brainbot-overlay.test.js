@@ -1,5 +1,5 @@
 /**
- * Brain Bot's "Show protection overlay" mode, guarded at the seams.
+ * Brain Rot's "Show protection overlay" mode, guarded at the seams.
  *
  * The content script has no module system to import, so — as with the other
  * page tests here — the shipped artefacts are checked statically. Comments are
@@ -252,8 +252,9 @@ test('a blocked channel uses the same display mode as a keyword match', () => {
   // for the channel the user had just blocked — the card vanished before the
   // reason could be read.
   assert.ok(
-    /const remove = config\.brainBotMode === 'remove';/.test(script),
-    'only the user’s display mode decides between cover and removal'
+    /const isReel = element\.localName === 'ytd-reel-video-renderer';/.test(script) &&
+      /const remove = config\.brainBotMode === 'remove' && !isReel;/.test(script),
+    'only the user’s display mode decides between cover and removal (reels always overlay)'
   );
   assert.ok(
     !/verdict\.via === 'channel' \|\| config\.brainBotMode/.test(script),
@@ -339,7 +340,7 @@ test('the stylesheet covers only the thumbnail and blocks the player in place', 
   assert.ok(/\[data-cv-protected\] #mouseover-overlay,/.test(css), 'and its mouseover surface is hidden too');
 });
 
-test('both Brain Bot modes are still described the same way to the user', () => {
+test('both Brain Rot modes are still described the same way to the user', () => {
   assert.ok(/value: 'remove'/.test(constants) && /value: 'overlay'/.test(constants));
   assert.ok(
     /Matching videos stay in place, covered by a ClearView overlay\./.test(constants),

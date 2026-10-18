@@ -7,7 +7,7 @@
  * used for the things that mean something — the bar beside a section label, the
  * glyph on a row, the switch when it is on, the active pill — and colour
  * reserved for state: a green hero card while Protection is active, a maroon one
- * for the filters that hide content the user might have wanted (Brain Bot and
+ * for the filters that hide content the user might have wanted (Brain Rot and
  * Strict Mode), and a dimmed row when a control cannot do anything because
  * Protection is off.
  *
@@ -56,7 +56,7 @@
   --success: var(--primary);
 
   /* The hero cards. Green is "this is working"; maroon is "this one hides
-     things", which is how the app marks Brain Bot and Strict Mode. Text on both
+     things", which is how the app marks Brain Rot and Strict Mode. Text on both
      is white, so a title never has to change colour to stay readable. */
   --hero-on-bg: #1d7c3f;
   --hero-on-bg-2: #16613a;
@@ -429,7 +429,7 @@ body {
   background-image: linear-gradient(180deg, var(--hero-on-bg), var(--hero-on-bg-2));
 }
 
-/* A filter that hides content — Brain Bot, Strict Mode. Maroon, as in the app. */
+/* A filter that hides content — Brain Rot, Strict Mode. Maroon, as in the app. */
 .card.alert {
   background-color: var(--hero-alert-bg);
   background-image: linear-gradient(180deg, var(--hero-alert-bg), var(--hero-alert-bg-2));

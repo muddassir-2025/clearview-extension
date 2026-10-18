@@ -140,7 +140,7 @@ html.cv-block-ads .ytp-ad-player-overlay-skip-or-preview {
   display: none !important;
 }
 
-/* ── Brain Bot protection overlay ──────────────────────────────────────── */
+/* ── Brain Rot protection overlay ──────────────────────────────────────── */
 
 /*
  * Drawn on the card's THUMBNAIL, so it covers the one control that would play
@@ -253,6 +253,32 @@ html.cv-block-ads .ytp-ad-player-overlay-skip-or-preview {
   opacity: 0.7;
   text-decoration: none;
   cursor: default;
+}
+
+/*
+ * Shorts in the scrolling reels player have a large viewport.
+ * Scale the overlay elements appropriately so they are clearly legible.
+ */
+ytd-reel-video-renderer .cv-block-overlay {
+  border-radius: 16px;
+  padding: 24px 20px;
+  gap: 10px;
+}
+
+ytd-reel-video-renderer .cv-block-overlay .cv-block-overlay__label {
+  font-size: 19px;
+}
+
+ytd-reel-video-renderer .cv-block-overlay .cv-block-overlay__reason {
+  font-size: 14.5px;
+  max-width: 85%;
+  line-height: 1.4;
+}
+
+ytd-reel-video-renderer .cv-block-overlay .cv-block-overlay__report {
+  font-size: 13.5px;
+  margin-top: 8px;
+  padding: 6px 12px;
 }
 
 /*

@@ -80,7 +80,7 @@ export function switchControl(checked, onChange, { disabled = false, label = 'To
  * `variant` is the card's state, and it is the whole visual language of the app's
  * Protection tab:
  *   - `'on'`     — active protection: green, white type, no badge tile.
- *   - `'alert'`  — a filter that hides content (Brain Bot, Strict Mode): maroon.
+ *   - `'alert'`  — a filter that hides content (Brain Rot, Strict Mode): maroon.
  *   - `'dashed'` — there is a list behind this row.
  *   - `''`       — an ordinary slate row.
  * `dim` is separate, because it is a different fact: this row cannot do anything

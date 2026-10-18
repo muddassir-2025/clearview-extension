@@ -13,7 +13,7 @@
  * whether the Protection password is set.
  *
  * That is the whole surface. Everything a user might want to *change* — the ad
- * blocker, Shorts, Brain Bot, keywords, blocked sites, channels, the password,
+ * blocker, Shorts, Brain Rot, keywords, blocked sites, channels, the password,
  * the community list — is one click away in the settings page, and putting a
  * copy of it here is what made this popup scroll. A popup that needs scrolling
  * to show a switch has stopped being a popup.

@@ -94,7 +94,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
    * user did not ask to see.
    */
   blockYoutubeAds: true,
-  /** Brain Bot (Brain Rot) protection on YouTube feeds. */
+  /** Brain Rot protection on YouTube feeds. */
   brainBotEnabled: false,
   /** 'remove' hides matching cards; 'overlay' covers them in place. */
   brainBotMode: 'overlay',
@@ -113,7 +113,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 /**
- * The Brain Bot display modes, in the order the UI offers them.
+ * The Brain Rot display modes, in the order the UI offers them.
  *
  * Mutually exclusive by construction: a single enum stored once, so "remove"
  * and "overlay" can never both be active.
@@ -130,6 +130,7 @@ export const BRAIN_BOT_MODES = Object.freeze([
     description: 'Matching videos stay in place, covered by a ClearView overlay.',
   },
 ]);
+export const BRAINROT_MODES = BRAIN_BOT_MODES;
 
 /**
  * The `source` values the backend's submission schema accepts.

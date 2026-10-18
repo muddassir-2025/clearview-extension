@@ -30,7 +30,7 @@ workflow.
   your feeds, its search result disappears, and its channel page and videos will
   not open. Manage them in settings — remove one, or ask for a **global block**,
   with no account and no sign-in.
-- **Brain Bot protection** on YouTube feeds, with a choice of *remove* or
+- **Brain Rot protection** on YouTube feeds, with a choice of *remove* or
   *overlay*.
 - **Community keyword submissions** through the existing backend review queue,
   with **anonymous** contributor identity and a versioned, cached shared
@@ -77,9 +77,9 @@ settings page.
 | **Block YouTube ads** | Refuses YouTube ad requests, removes ad slots, and chases off video ads (muted, at 16×, with the ad's own UI hidden). On by default. |
 | **Block YouTube Shorts** | Hides the Shorts entry points, the feed shelf and its cards, and blocks Shorts links (app parity). |
 | **Block incognito mode** | Closes private windows as they open, so a block cannot be walked around by switching profiles. Requires Chrome's *Allow in incognito* for ClearView; the card reports whether it is granted. |
-| **Brain Bot Protection** | Filters YouTube feed cards. Choose *Remove from feed* or *Show protection overlay*. |
+| **Brain Rot Protection** | Filters YouTube feed cards. Choose *Remove from feed* or *Show protection overlay*. |
 | **Blocked websites / keywords** | Your own rules. Keywords apply to every site and search. |
-| **Brain Bot keywords** | Keywords matched against YouTube titles only. |
+| **Brain Rot keywords** | Keywords matched against YouTube titles only. |
 | **Blocked channels** | Channels you blocked, with *Remove* and *Ask to block for everyone* on each. Stored by `@handle` and by channel id where they are known, so a rename never loses the block; a block made from a feed card that carries no link is stored and matched by the channel's printed name, and says so. |
 | **Backend server** | Defaults to the deployed ClearView server. Change for self-hosting. |
 | **Anonymous identity** | The random install id your contributions are sent with. |
@@ -216,7 +216,7 @@ the worker's — and keeps a page from holding the rule set.
   cover and pause synchronously, before the debounced scan. Only playback this
   script paused is resumed, and only once the next Short is confirmed clean —
   otherwise swiping left the next Short covered and unable to play.
-- **Brain Bot:** cards are either removed (`display: none`) or covered in place
+- **Brain Rot:** cards are either removed (`display: none`) or covered in place
   by an overlay, per the chosen mode. YouTube is a single-page app, so changes are
   re-applied on `yt-navigate-finish` and on DOM mutations (debounced), and every
   card is marked once handled — an overlay can never be stacked twice.
@@ -407,14 +407,12 @@ got no entry at all and nothing could be clicked or confirmed; and the card was
 
 | Surface | How it is decided |
 | --- | --- |
-| YouTube feeds | The card's channel **link** (`/@handle` or `/channel/UC…`) is matched when the card has one, and the channel's **printed name** when it does not — which is every card in the current `yt-lockup-view-model` grid, where the channel is an attributed string carrying a click command and no href. Filtered whenever Protection is on — the Brain Bot toggle governs the *keyword* filters, and an explicit block is not its business. |
+| YouTube feeds | The card's channel **link** (`/@handle` or `/channel/UC…`) is matched when the card has one, and the channel's **printed name** when it does not — which is every card in the current `yt-lockup-view-model` grid, where the channel is an attributed string carrying a click command and no href. Filtered whenever Protection is on — the Brain Rot toggle governs the *keyword* filters, and an explicit block is not its business. |
 | A search result | A search for a channel's name returns a `ytd-channel-renderer` — the big avatar and a Subscribe button — and it is evaluated like any other card, so a blocked channel's does not appear at all. |
 | The channel's page and its tabs (`/videos`, `/shorts`, …) | The identity is in the URL, so the worker's navigation evaluator blocks it — `/@handle`, `/channel/UC…`, `/c/Name` and `/user/Name` all resolve to the same channel. The content script also sends the name the page prints, which is what covers a block stored by name alone. |
 | A video page | A watch URL names **no channel**, so the content script reads the owner link off the page and asks the worker (`channel/check`). The redirect is the worker's, because a page cannot navigate itself to a `chrome-extension://` URL — which is also why the blocked page is *not* made web-accessible. |
 
-An explicitly blocked channel is **removed** from feeds whatever the Brain Bot
-display mode is: the mode chooses how a keyword match is presented, and has no
-business leaving behind a channel the user asked to be rid of.
+An explicitly blocked channel follows the same display mode as keywords (*Remove from feed* or *Show protection overlay*), except for Shorts in the scrolling reels player where hiding the card breaks player scrolling — reels always display the protection overlay.
 
 ### Channel identity, and what is never guessed
 
@@ -667,7 +665,7 @@ pass).
   decoding, the safe destination carrying no query, and Shorts-URL detection.
 - **`tests/rules.test.js`** — the generated lists are populated, no comment text
   leaked, and community rules **add** to the built-in ones.
-- **`tests/blocking.test.js`** — the navigation evaluator and Brain Bot feed
+- **`tests/blocking.test.js`** — the navigation evaluator and Brain Rot feed
   evaluation against stubs, including "protection off blocks nothing" and the
   blocked-channel rules (a channel page in every URL shape it has, a feed card
   matched through its link, and that a **video** URL is deliberately *not*
@@ -694,12 +692,13 @@ pass).
   artefacts: the `/shorts` link is matched by **prefix**, the label is matched on
   the element *and* on a descendant, the feed shelf / reel shelf / Short card /
   Shorts tab are all covered by the stylesheet *and* the script, the hiding is
-  reversible, and a Short is a Brain Bot card in BOTH the reels player (its live
-  title view model, pausing the playing video) and a feed shelf (judged once).
+  reversible, and a Short is a Brain Rot card in BOTH the reels player (its live
+  title view model, displaying an overlay even in Remove mode and pausing the playing video)
+  and a feed shelf (judged once).
 - **`tests/blocked-page.test.js`** — the blocked destination page: it asks the
   user for nothing, its Back button leaves for YouTube home, every reason the
   worker can emit has copy on it, and it never reprints what was blocked.
-- **`tests/brainbot-overlay.test.js`** — the Brain Bot overlay: it is drawn on the thumbnail
+- **`tests/brainbot-overlay.test.js`** — the Brain Rot overlay: it is drawn on the thumbnail
   with the reason it was blocked, as a near-solid black panel with a text report link living on
   the blocked *player* instead of the feed; a decision is treated as stale once its effect has
   left the page (the overlay YouTube threw away is rebuilt); a covered card stops any hover
@@ -786,11 +785,11 @@ pass).
 | **Nothing changes before setup** | On a fresh install, a settings write from the console (`settings/update`) is refused with `password_required`. |
 | **Protection off is gated; on is free** | Turn Protection on from the popup — no password. Turn it off — it asks, a wrong one changes nothing, and five wrong guesses lock the check for a minute. |
 | **Export / erase** | Settings → Advanced → *Export my data* downloads a JSON file without any credential; *Erase all data* asks for confirmation, then returns the page to setup. |
-| Brain Bot remove / overlay | Toggle each mode on a home feed. |
+| Brain Rot remove / overlay | Toggle each mode on a home feed. |
 | Dynamic navigation | Scroll the feed; overlays must not duplicate. |
 | **Block a channel from ⋮** | Open a video, use the ⋮ menu → *Block this channel*; the entry then reads *Unblock this channel*. |
 | **Block a Short’s channel from its ⋮** | Open `/shorts/…`, use the three-dot menu → *Block channel*: the toast names the channel, and the Short is covered (overlay) or removed (remove) and paused. |
-| **Password only for the weakening direction** | Turning Shorts / ads / Brain Bot / Strict Mode ON is instant; turning any of them OFF asks for the password. Adding a keyword or channel is instant; removing one asks. |
+| **Password only for the weakening direction** | Turning Shorts / ads / Brain Rot / Strict Mode ON is instant; turning any of them OFF asks for the password. Adding a keyword or channel is instant; removing one asks. |
 | **Block incognito mode** | Allow ClearView in incognito in `chrome://extensions`, turn the toggle on, then open a private window: it closes. The card warns when Chrome has not allowed the extension. |
 | **A Shorts shelf card responds too** | A blocked channel or matching keyword covers or removes its Short in the home shelf, not only in the player. |
 | **Remove mode leaves no visible Shorts behind** | With a channel blocked and *Remove* selected, open its channel page or Shorts tab and scroll: the grid empties as it loads, with no visible Short left to click. |
@@ -798,7 +797,7 @@ pass).
 | **A blocked channel’s search result is gone** | Search the channel's name: no avatar result, no Subscribe button, for it — and other channels' results are untouched. |
 | **A blocked channel is gone** | Its cards leave home/search/subscriptions (the `yt-lockup-view-model` grid, the classic list, and the legacy Shorts shelf's `ytd-reel-item-renderer`), `/@handle` and `/channel/UC…` show the blocked page, and its video pages redirect there. |
 | **A block made on a video page reaches the feed** | Block from a video's ⋮ menu, go back to the feed, scroll: no card from that channel, including ones already on screen. |
-| **Brain Bot overlay is visible** | Switch to *Show protection overlay* with a keyword that matches: the card stays, its **thumbnail** is covered by a *Blocked by ClearView* overlay naming the matched term, and switching to *Remove* makes the same card leave. |
+| **Brain Rot overlay is visible** | Switch to *Show protection overlay* with a keyword that matches: the card stays, its **thumbnail** is covered by a *Blocked by ClearView* overlay naming the matched term, and switching to *Remove* makes the same card leave. |
 | **A covered long video opens a blocked player** | In overlay mode, click a covered long video's thumbnail: the video page opens with the player blocked and paused, while the description and comments remain readable. Press play: it pauses again. The card's ⋮ still opens, with *Unblock* in it. |
 | **A covered Short does not open the reel player** | In overlay mode, click a covered Short's thumbnail or title: the page does not navigate, and the Short does not play. The ⋮ still opens. |
 | **A blocked channel gets the overlay too** | Block a channel, return to the feed: its card stays, with only the thumbnail covered and the title readable — exactly like a keyword match. |
@@ -841,7 +840,7 @@ src/
     rules-sync.js             Versioned/TTL shared-blocklist cache
     api.js                    Backend client (public + admin)
     state.js                  Live settings + rule bundle
-  content/                    YouTube content script (Shorts, ads, Brain Bot)
+  content/                    YouTube content script (Shorts, ads, Brain Rot)
   popup/                      ClearView and compact activity; a switch only while off
   options/                    Sidebar settings page (the full Block tab)
   admin/                      Protected moderation dashboard
@@ -975,7 +974,7 @@ A **mandatory** lock on the **Protection** switch, created at first run
   makes it mandatory in practice rather than a dialog a page can skip: a fresh
   install has no password-less window in which Protection could be turned off.
 - **What it guards.** The direction that WEAKENS protection: turning any switch
-  off (Protection, Brain Bot, Shorts, YouTube ads, Strict Mode, block-incognito),
+  off (Protection, Brain Rot, Shorts, YouTube ads, Strict Mode, block-incognito),
   and removing a blocked channel, website or keyword. The worker enforces this in
   `settings/update`, so a page cannot skip the dialog, and in `channel/unblock`
   for the channel list. Turning a switch ON and ADDING a block are free — a lock

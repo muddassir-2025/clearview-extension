@@ -290,7 +290,7 @@ function render() {
     shortsCard(protectionOn),
     managerCard({
       badge: icon('filter', 21),
-      title: 'Brain Bot keywords',
+      title: 'Brain Rot keywords',
       subtitle: 'Matched against YouTube titles only — never against other websites.',
       placeholder: 'e.g. a phrase you keep seeing',
       items: settings.youtubeKeywords,
@@ -428,7 +428,7 @@ function protectionCard(protectionOn, bundleCounts) {
     open: false,
     detail: [
       'The built-in adult filter, your blocked websites, your keywords and any shared rules all apply while Protection is on.',
-      'Turning Protection off stops every block immediately — websites, searches, Shorts and Brain Bot alike.',
+      'Turning Protection off stops every block immediately — websites, searches, Shorts and Brain Rot alike.',
       // Channels are counted by handle, by id AND by name: a block made from a
       // feed thumbnail has no handle to count, and leaving it out made the
       // header read "0 channels" next to a list that plainly had one.
@@ -625,7 +625,7 @@ function brainBotCard(protectionOn) {
   const status = el('div', { class: 'status-line' });
   const node = card({
     icon: icon('brain', 21),
-    title: 'Brain Bot Protection',
+    title: 'Brain Rot Protection',
     subtitle: 'Filter unwanted content from YouTube feeds using keywords and channels.',
     // Maroon while it is on, as the app marks it: this is the filter that hides
     // videos that are not outright blocked, so it is worth flagging as the
@@ -636,7 +636,7 @@ function brainBotCard(protectionOn) {
     open: false,
     trailing: switchControl(state.settings.brainBotEnabled, (value) => patch({ brainBotEnabled: value }), {
       disabled: !protectionOn,
-      label: 'Brain Bot Protection',
+      label: 'Brain Rot Protection',
     }),
   });
 

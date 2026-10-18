@@ -10,7 +10,7 @@
  *    Blocking a Shorts URL outright is the background worker's job (the
  *    `blockShorts` check in evaluateUrl), which keeps the two concerns — what
  *    the page shows, and what may be loaded — separate.
- *  - **Brain Bot feed protection.** Matching feed cards are either removed or
+ *  - **Brain Rot feed protection.** Matching feed cards are either removed or
  *    covered in place, according to the user's chosen mode.
  *  - **Blocking a channel, from where the user actually is.** A "Block this
  *    channel" entry is added to the video's own ⋮ menu, and the script records
@@ -112,7 +112,7 @@
     // is a long video there.
     'ytd-rich-grid-slim-media',
     // One Short in the reels player. It is a card in every way that matters:
-    // it has a title, a channel and a ⋮, and Brain Bot has to be able to cover
+    // it has a title, a channel and a ⋮, and Brain Rot has to be able to cover
     // or remove it exactly like a long video's card.
     'ytd-reel-video-renderer',
   ].join(',');
@@ -440,7 +440,7 @@
       const recorded = hiddenShorts.get(target);
       if (recorded !== undefined && target.style.display === 'none') continue;
       // Recorded once, and re-applied rather than skipped while the map still
-      // knows the element: another part of this script (a Brain Bot reset, a
+      // knows the element: another part of this script (a Brain Rot reset, a
       // channel that was blocked and unblocked) can write that same inline
       // display, and a surface that stayed visible because we believed it was
       // already hidden would be the toggle quietly not working.
@@ -682,7 +682,7 @@
 
     // A Short, in either place it appears: the reels player's header, and the
     // Shorts lockup in a feed shelf. Neither carries `#video-title`, so without
-    // this a Shorts title matched nothing and Brain Bot looked switched off on
+    // this a Shorts title matched nothing and Brain Rot looked switched off on
     // exactly the content it was meant to filter.
     //
     // The desktop player's title is now its own view model (`h1` with
@@ -1349,7 +1349,11 @@
     const link = element.querySelector(
       'a[href^="/watch"], a[href^="/shorts/"], a[href*="youtube.com/watch"], a[href*="youtube.com/shorts/"]'
     );
-    const href = (link?.getAttribute('href') ?? '').trim();
+    let href = (link?.getAttribute('href') ?? '').trim();
+    if (href === '' && element.localName === 'ytd-reel-video-renderer') {
+      const vid = shortVideoId(element);
+      if (vid) href = `/shorts/${vid}`;
+    }
     if (href === '') return null;
     try {
       // Resolved against YouTube explicitly: this script only runs there, and a
@@ -1520,7 +1524,14 @@
     // Forcing channels to be removed made the overlay appear for keywords but
     // not for the channel the user had just blocked — the card vanished before
     // the reason could be read, and there was nothing left to report.
-    const remove = config.brainBotMode === 'remove';
+    //
+    // However, for scrolling Shorts in the reels player (ytd-reel-video-renderer),
+    // removing or hiding the reel breaks YouTube's scrolling player and fails
+    // to remove the active reel from the feed, leaving the video paused on screen
+    // without an explanation. Therefore, scrolling feed reels always display the
+    // protection overlay instead of hiding the card, even when 'remove' mode is selected.
+    const isReel = element.localName === 'ytd-reel-video-renderer';
+    const remove = config.brainBotMode === 'remove' && !isReel;
     record.mode = remove ? 'remove' : 'overlay';
 
     if (record.mode === 'remove') {
@@ -1600,9 +1611,20 @@
 
   /** The video id from a Short's own link, or null when this is not a Short. */
   function shortVideoId(element) {
-    const link = element.querySelector('a[href^="/shorts/"]')?.getAttribute('href') ?? '';
-    const match = /^\/shorts\/([\w-]{5,})/.exec(link);
-    return match ? match[1] : null;
+    const link =
+      element.querySelector('a[href^="/shorts/"], a[href*="/shorts/"]')?.getAttribute('href') ?? '';
+    const match = /^\/shorts\/([\w-]{5,})/.exec(link) ?? /\/shorts\/([\w-]{5,})/.exec(link);
+    if (match) return match[1];
+    // A reel in the live player may not carry an anchor tag: its id is in the
+    // URL when active in the scrolling player.
+    if (
+      element.localName === 'ytd-reel-video-renderer' &&
+      location.pathname.startsWith('/shorts/')
+    ) {
+      const pathMatch = /^\/shorts\/([\w-]{5,})/.exec(location.pathname);
+      if (pathMatch) return pathMatch[1];
+    }
+    return null;
   }
 
   /**
@@ -1670,6 +1692,13 @@
   async function resolveShortChannel(element) {
     const pageIdentity = channelPageShortIdentity();
     if (pageIdentity) return pageIdentity;
+    if (
+      element.localName === 'ytd-reel-video-renderer' &&
+      location.pathname.startsWith('/shorts/')
+    ) {
+      const liveIdentity = watchIdentityFromPlayerResponse();
+      if (liveIdentity) return liveIdentity;
+    }
     const videoId = shortVideoId(element);
     if (!videoId) return null;
     if (shortChannelCache.has(videoId)) return shortChannelCache.get(videoId);
@@ -1757,7 +1786,7 @@
    * explicit title would slip through permanently.
    */
   async function scan() {
-    // Blocked channels are filtered whenever Protection is on; the Brain Bot
+    // Blocked channels are filtered whenever Protection is on; the Brain Rot
     // toggle governs the keyword filters. Both are decided in the worker, so this
     // only has to know whether EITHER could apply — and asking is what keeps the
     // rule set out of the page.
@@ -2393,7 +2422,7 @@
   /**
    * Ask the worker whether the video being watched is blocked, and stop it if so.
    *
-   * The same evaluator as the feed, in the worker: a title match (Brain Bot on)
+   * The same evaluator as the feed, in the worker: a title match (Brain Rot on)
    * or a blocked channel — which is how a thumbnail that was clicked still lands
    * on a page whose video will not play.
    */
@@ -2675,6 +2704,7 @@
       try {
         video.pause();
         video.muted = true;
+        if (protectedReel) pausedByClearView.add(video);
       } catch {
         /* the element is being replaced mid-teardown */
       }

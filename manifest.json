@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ClearView — Content Protection",
   "version": "1.0.0",
-  "description": "Blocks explicit sites and searches, YouTube ads, plus Shorts hiding and Brain Bot filtering.",
+  "description": "Blocks explicit sites and searches, YouTube ads, plus Shorts hiding and Brain Rot filtering.",
   "minimum_chrome_version": "102",
   "incognito": "spanning",
   "icons": {

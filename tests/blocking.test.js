@@ -124,7 +124,7 @@ test('the Shorts control is inert when protection is off', () => {
   assert.equal(evaluateUrl('https://www.youtube.com/shorts/abc', s).action, 'allow');
 });
 
-// ── Brain Bot feed evaluation ────────────────────────────────────────────
+// ── Brain Rot feed evaluation ────────────────────────────────────────────
 
 test('feed cards match on title and on channel', () => {
   const s = state();
@@ -221,13 +221,13 @@ test('a card that gives only the channel NAME is filtered, not left in place', (
   assert.equal(blocked[0].via, 'channel');
 });
 
-test('feed evaluation is inert when Brain Bot is off or protection is off', () => {
+test('feed evaluation is inert when Brain Rot is off or protection is off', () => {
   const cards = [{ title: 'porn compilation', channel: 'x' }];
   assert.deepEqual(evaluateFeedCards(cards, state({ settings: { brainBotEnabled: false } })), []);
   assert.deepEqual(evaluateFeedCards(cards, state({ settings: { protectionEnabled: false } })), []);
 });
 
-test('a blocked channel is still filtered when Brain Bot is off, and a keyword is not', () => {
+test('a blocked channel is still filtered when Brain Rot is off, and a keyword is not', () => {
   const s = state({ settings: { brainBotEnabled: false } });
   const blocked = evaluateFeedCards(
     [
@@ -419,8 +419,8 @@ test('the channel check is inert when protection is off', () => {
 
 // ── Blocked channels: the feeds ──────────────────────────────────────────
 
-test('a blocked channel is filtered even with Brain Bot switched off', () => {
-  // The Brain Bot toggle governs the KEYWORD filters. An explicit block is the
+test('a blocked channel is filtered even with Brain Rot switched off', () => {
+  // The Brain Rot toggle governs the KEYWORD filters. An explicit block is the
   // user's own decision and must not be undone by a switch with another job.
   const s = channelState({ settings: { brainBotEnabled: false } });
   const blocked = evaluateFeedCards(

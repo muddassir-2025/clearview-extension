@@ -110,6 +110,17 @@ test('a Short in the reels player is a card like any other', () => {
   );
 });
 
+test('a Short in the scrolling reels player displays an overlay even in Remove mode', () => {
+  assert.ok(
+    /const isReel = element\.localName === 'ytd-reel-video-renderer';/.test(script),
+    'the reel element must be recognised'
+  );
+  assert.ok(
+    /const remove = config\.brainBotMode === 'remove' && !isReel;/.test(script),
+    'a reel in the scrolling player must always use overlay mode rather than being hidden'
+  );
+});
+
 test('a Short in a feed shelf is judged too, and only once', () => {
   // A shelf Short is wrapped by a `ytd-rich-item-renderer` on the home feed, but
   // the channel page serves the lockup bare. Without it in `cardElements` a

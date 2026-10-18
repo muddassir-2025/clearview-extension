@@ -250,7 +250,7 @@ test('the popup is the name, the activity and a way in once protection is on', a
 
   // The controls that used to make this popup scroll are gone from it, and stay
   // gone. They live in the settings page.
-  for (const moved of ['Block YouTube ads', 'Hide YouTube Shorts', 'Brain Bot', 'Blocked websites', 'Blocked keywords', 'Strict Mode']) {
+  for (const moved of ['Block YouTube ads', 'Hide YouTube Shorts', 'Brain Bot', 'Brain Rot', 'Blocked websites', 'Blocked keywords', 'Strict Mode']) {
     assert.doesNotMatch(text, new RegExp(moved), `${moved} belongs in the settings page, not the popup`);
   }
 
@@ -335,7 +335,7 @@ test('the settings page renders the ad toggle and the password card', async () =
   }
 
   const switches = walk(byId.content).filter((node) => node.attributes?.role === 'switch');
-  assert.ok(switches.length >= 5, 'protection, ads, shorts, Brain Bot and incognito each need a switch');
+  assert.ok(switches.length >= 5, 'protection, ads, shorts, Brain Rot and incognito each need a switch');
 });
 
 test('turning a settings switch OFF asks for the password; turning one ON does not', async () => {

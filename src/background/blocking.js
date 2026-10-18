@@ -327,7 +327,7 @@ function reportableMatch(bundle, via, matchedItem) {
 }
 
 /**
- * Decide which feed cards are Brain Bot content.
+ * Decide which feed cards are Brain Rot content.
  *
  * The same evaluation the app runs over a YouTube feed card, reused here rather
  * than reimplemented in the content script:
@@ -344,11 +344,11 @@ function reportableMatch(bundle, via, matchedItem) {
  *
  * The two halves answer to different switches, and that is deliberate. A
  * channel the user blocked BY HAND is filtered whenever Protection is on: the
- * Brain Bot toggle filters keyword matches, and letting it also decide whether an
+ * Brain Rot toggle filters keyword matches, and letting it also decide whether an
  * explicit block applies would mean a channel the user blocked kept appearing
  * because a switch with a different job happened to be off. Everything else —
  * titles, and suggestive channel NAMES from the built-in filters — is what the
- * Brain Bot toggle is for.
+ * Brain Rot toggle is for.
  *
  * @param {Array<{title?: string, channel?: string, channelUrl?: string}>} cards
  * @returns {Array<{index: number, matchedItem: string, via: string}>}
