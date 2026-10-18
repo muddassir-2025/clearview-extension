@@ -550,13 +550,39 @@
     }
 
     const overlayClose = player.querySelector(AD_OVERLAY_CLOSE_SELECTOR);
-    if (overlayClose && isVisible(overlayClose)) overlayClose.click();
+    if (overlayClose) {
+      try {
+        overlayClose.click();
+      } catch {
+        /* ignore click error */
+      }
+    }
 
     // Click, and keep clicking: the control is inserted a moment after the ad
     // starts, and a single miss used to leave the ad running to its end.
     for (const skip of player.querySelectorAll(AD_SKIP_SELECTOR)) {
-      if (!isVisible(skip)) continue;
-      skip.click();
+      try {
+        skip.click();
+      } catch {
+        /* ignore */
+      }
+      try {
+        skip.closest('button')?.click();
+      } catch {
+        /* ignore */
+      }
+    }
+    for (const skip of document.querySelectorAll(AD_SKIP_SELECTOR)) {
+      try {
+        skip.click();
+      } catch {
+        /* ignore */
+      }
+      try {
+        skip.closest('button')?.click();
+      } catch {
+        /* ignore */
+      }
     }
 
     if (!video) return;
@@ -584,6 +610,20 @@
       } catch {
         /* nothing to seek on this element */
       }
+    }
+
+    // If the video was paused during the ad seek, resume it so the ad completes immediately
+    if (video.paused) {
+      try {
+        video.play();
+      } catch {
+        /* auto-play policy may refuse */
+      }
+    }
+    try {
+      if (typeof player.playVideo === 'function') player.playVideo();
+    } catch {
+      /* ignore */
     }
   }
 
@@ -630,6 +670,38 @@
    * feed and the player both render ads after the page settles — a one-shot pass
    * at load would miss most of them.
    */
+  let playerObserver = null;
+  function attachPlayerAdObserver() {
+    const player = document.querySelector('#movie_player, .html5-video-player');
+    if (!player) return;
+    if (player.dataset.cvAdObserved !== '1') {
+      player.dataset.cvAdObserved = '1';
+      if (!playerObserver) {
+        playerObserver = new MutationObserver(() => {
+          if (!adsOn()) return;
+          const showing = player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting');
+          if (showing) handleVideoAds();
+        });
+      }
+      playerObserver.observe(player, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    const video = player.querySelector('video');
+    if (video && video.dataset.cvAdHooked !== '1') {
+      video.dataset.cvAdHooked = '1';
+      const onAdTick = () => {
+        if (!adsOn()) return;
+        if (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting')) {
+          handleVideoAds();
+        }
+      };
+      video.addEventListener('play', onAdTick, true);
+      video.addEventListener('playing', onAdTick, true);
+      video.addEventListener('timeupdate', onAdTick, true);
+      video.addEventListener('loadedmetadata', onAdTick, true);
+    }
+  }
+
   function applyAds() {
     const on = adsOn();
     document.documentElement.classList.toggle(HIDE_ADS_CLASS, on);
@@ -640,6 +712,7 @@
     }
     removeAdElements();
     handleVideoAds();
+    attachPlayerAdObserver();
   }
 
   // ── Reading a card ─────────────────────────────────────────────────────
@@ -872,8 +945,7 @@
     return (
       node.closest(CARD_SELECTOR) ??
       node.closest(LOCKUP_CARD_SELECTOR) ??
-      // A Short in a feed SHELF is a lockup with no renderer around it either,
-      // so without this its ⋮ and right-click had no card to record.
+      // A Short in a feed shelf has no renderer around it either.
       node.closest(SHORTS_LOCKUP_SELECTOR)
     );
   }
@@ -1274,7 +1346,15 @@
       // default would navigate to the video instead of reporting.
       event.preventDefault();
       event.stopPropagation();
-      void reportFalsePositive(verdict, button, context);
+      const reportContext = typeof context === 'function' ? context() : { ...context };
+      if (!reportContext.videoUrl) {
+        const card =
+          button.closest(CARD_SELECTOR) ||
+          button.closest(LOCKUP_CARD_SELECTOR) ||
+          button.closest(SHORTS_LOCKUP_SELECTOR);
+        if (card) reportContext.videoUrl = cardVideoUrl(card);
+      }
+      void reportFalsePositive(verdict, button, reportContext);
     });
     return button;
   }
@@ -1346,9 +1426,11 @@
 
   /** The video a card points at, canonicalised, or null when it has no video. */
   function cardVideoUrl(element) {
-    const link = element.querySelector(
-      'a[href^="/watch"], a[href^="/shorts/"], a[href*="youtube.com/watch"], a[href*="youtube.com/shorts/"]'
-    );
+    if (!element) return null;
+    const link =
+      element.querySelector(
+        'a#thumbnail[href], a#video-title-link[href], a#video-title[href], a.ytLockupMetadataViewModelTitle[href], a[href*="/watch?v="], a[href*="/shorts/"], a[href^="/watch"], a[href^="/shorts/"], a[href*="youtube.com/watch"], a[href*="youtube.com/shorts/"], a[href*="youtu.be/"]'
+      ) ?? (element.matches?.('a[href]') ? element : element.closest?.('a[href]'));
     let href = (link?.getAttribute('href') ?? '').trim();
     if (href === '' && element.localName === 'ytd-reel-video-renderer') {
       const vid = shortVideoId(element);
@@ -1365,7 +1447,12 @@
         return id ? `${url.origin}/watch?v=${encodeURIComponent(id)}` : null;
       }
       const match = /^\/shorts\/([\w-]{5,})/.exec(url.pathname);
-      return match ? `${url.origin}/shorts/${match[1]}` : null;
+      if (match) return `${url.origin}/shorts/${match[1]}`;
+      const youtuMatch = /^\/([\w-]{11})/.exec(url.pathname);
+      if (url.hostname.includes('youtu.be') && youtuMatch) {
+        return `https://www.youtube.com/watch?v=${encodeURIComponent(youtuMatch[1])}`;
+      }
+      return url.origin + url.pathname + (url.search ? url.search : '');
     } catch {
       return null;
     }
@@ -2744,7 +2831,7 @@
     window.setInterval(() => {
       if (document.visibilityState === 'hidden') return;
       if (adsOn()) applyAds();
-    }, 1000);
+    }, 250);
   }
 
   function start() {

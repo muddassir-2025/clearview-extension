@@ -547,10 +547,11 @@ function reportVideos(report) {
     at: report.createdAt ?? report.lastReportedAt ?? null,
   }));
   // Some later server shape may name the URL directly; accept it as well.
-  if (report.videoUrl && !videos.some((video) => video.url === report.videoUrl)) {
+  const directUrl = report.videoUrl || report.video_url || report.url || report.targetUrl || report.target_url;
+  if (directUrl && !videos.some((video) => video.url === directUrl)) {
     videos.unshift({
-      url: report.videoUrl,
-      title: report.videoTitle ?? null,
+      url: directUrl,
+      title: report.videoTitle ?? report.title ?? null,
       channel: report.channel ?? null,
       text: '',
       at: report.createdAt ?? null,
@@ -701,11 +702,11 @@ async function renderReports() {
  * can watch.
  */
 function reportGroupCard(group, resolve) {
-  const body = el('div', { class: 'report-body hidden' });
+  const body = el('div', { class: 'report-body' });
   const kindLabel = group.kind === 'channel' ? 'Channel' : 'Keyword';
   const videoLabel = `${group.videos.length} video${group.videos.length === 1 ? '' : 's'}`;
 
-  const head = el('button', { class: 'report-head', type: 'button', 'aria-expanded': 'false' }, [
+  const head = el('button', { class: 'report-head is-open', type: 'button', 'aria-expanded': 'true' }, [
     el('div', { class: 'report-head__titles' }, [
       el('div', { class: 'report-head__name', text: group.value }),
       el('div', {
@@ -718,6 +719,12 @@ function reportGroupCard(group, resolve) {
           .filter(Boolean)
           .join(' · '),
       }),
+      group.videos.find((v) => v.url)
+        ? el('div', {
+            class: 'report-head__url',
+            text: group.videos.filter((v) => v.url).map((v) => v.url).join(' · '),
+          })
+        : null,
     ]),
     el('div', { class: 'report-head__side' }, [
       pill(`${group.count} report${group.count === 1 ? '' : 's'}`, 'rejected'),
@@ -757,6 +764,7 @@ function reportGroupCard(group, resolve) {
               video.channel && video.channel !== label
                 ? el('span', { class: 'report-video__meta', text: video.channel })
                 : null,
+              el('span', { class: 'report-video__verify', text: 'Open video to verify ↗' }),
             ]
           )
         : el('div', { class: 'report-video report-video--plain' }, [

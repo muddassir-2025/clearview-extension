@@ -17,7 +17,7 @@
  * password. This is the address the backend itself is provisioned with — keep
  * both sides in step, and check `SUPER_ADMIN_EMAIL` if sign-in is ever refused.
  */
-export const ADMIN_EMAIL = "studymuddassir@gmail.com";
+export const ADMIN_EMAIL = null;
 
 /** The backend this build points at, or null to use the shipped default. */
 export const API_BASE = null;
